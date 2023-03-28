@@ -11,36 +11,22 @@ jobs:
     runs-on: ubuntu-18.04
     steps:
     - uses: actions/checkout@v2
-    - name: Set up Python 3.8
+    - name: Set up Python 3.10
       uses: actions/setup-python@v2
       with:
-        python-version: 3.8
+        python-version: 3.10
     - name: Lint
       run: |
         pip install flake8
-        flake8 funcy
-        flake8 --select=F,E5,W tests
-
-  docs:
-    runs-on: ubuntu-18.04
-    steps:
-    - uses: actions/checkout@v2
-    - name: Set up Python 3.8
-      uses: actions/setup-python@v2
-      with:
-        python-version: 3.8
-    - name: Build docs
-      working-directory: ./docs
-      run: |
-        pip install -r requirements.txt
-        sphinx-build -b html -W . _build/html
+        flake8 pytest_matcher
+        flake8 tests
 
   test:
     runs-on: ubuntu-18.04
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.4", "3.5", "3.6", "3.7", "3.8", "3.9", "3.10", "3.11", "pypy3"]
+        python-version: ["3.7", "3.8", "3.9", "3.10", "3.11", "pypy3"]
 
     steps:
     - uses: actions/checkout@v2
