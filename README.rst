@@ -50,5 +50,5 @@ of all of the above::
     tox -e lint
 
 
-.. |Build Status| image:: https://github.com/Suor/pytest-matcher/actions/workflows/test.yml/badge.svg
+.. |Build Status| image:: https://github.com/Suor/pytest-matcher/actions/workflows/ci.yml/badge.svg
    :target: https://github.com/Suor/pytest-matcher/actions/workflows/test.yml?query=branch%3Amaster
