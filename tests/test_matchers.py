@@ -1,8 +1,8 @@
+from datetime import datetime, timedelta
 import re
-# from datetime import datetime, timedelta
 from types import SimpleNamespace
 
-# import pytest
+import pytest
 
 
 def test_object(M):
@@ -89,68 +89,22 @@ def test_unordered(M):
     assert ["a", "b"] != M.unordered("a", "c")
 
 
-# def test_approx_datetime_repr(M):
-#     obj = M.approx(datetime(2021, 11, 29))
-#     assert repr(obj) == (
-#         "approx_datetime(datetime.datetime(2021, 11, 29, 0, 0) "
-#         "± datetime.timedelta(seconds=1))"
-#     )
+def test_approx_datetime(M):
+    assert repr(M.approx(datetime(2023, 3, 31))) == "approx(2023-03-31 00:00:00 ± 0:00:01)"
+
+    now = datetime.now()
+    delta10s = timedelta(seconds=10)
+    assert M.approx(now) == datetime.now()
+    assert M.approx(now - delta10s) != now
+    assert M.approx(now - delta10s, abs=delta10s) == now
+    assert M.approx(now - delta10s, abs=10) == now
+
+    with pytest.raises(TypeError, match="rel doesn't make sense"):
+        M.approx(now, 1)
+    with pytest.raises(TypeError, match="rel doesn't make sense"):
+        M.approx(now, rel=1)
 
 
-# def test_approx_datetime(M):
-#     assert M.approx(datetime.now()) == datetime.now()
-#     with pytest.raises(AssertionError):
-#         expected = datetime.now() - timedelta(seconds=10)
-#         assert M.approx(expected) == datetime.now()
-
-
-# def test_approx_should_fallback_to_pytest(M):
-#     assert M.approx(3.0 + 1e-6) == 3
-
-
-# def test_M(M):
-#     experiments = {
-#         "b05eec": {
-#             "baseline": {
-#                 "data": {
-#                     "timestamp": datetime(2021, 8, 2, 16, 48, 14),
-#                     "params": {
-#                         "params.yaml": {
-#                             "data": {
-#                                 "featurize": {
-#                                     "max_features": 3000,
-#                                     "ngrams": 1,
-#                                 },
-#                                 "parent": 20170428,
-#                                 "train": {
-#                                     "n_est": 100,
-#                                     "min_split": 2,
-#                                 },
-#                             }
-#                         }
-#                     },
-#                     "name": "master",
-#                 }
-#             }
-#         }
-#     }
-
-#     assert experiments == {
-#         "b05eec": {
-#             "baseline": {
-#                 "data": M.dict(
-#                     timestamp=M.approx(datetime(2021, 8, 2, 16, 48, 15)),
-#                     params={
-#                         "params.yaml": M.dict(
-#                             data=M.dict(
-#                                 featurize=M.any,
-#                                 parent=20170428,
-#                                 train=M.dict(n_est=100),
-#                             )
-#                         ),
-#                     },
-#                     name=M.re(r"master"),
-#                 )
-#             }
-#         }
-#     }
+def test_approx_fallback(M):
+    assert M.approx(3.0 + 1e-6) == 3
+    assert M.approx([1, 2], 0.01) == [1, 2.01]
