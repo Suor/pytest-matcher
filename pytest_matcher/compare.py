@@ -193,7 +193,7 @@ class Explanation(dict):
     """An explanation of a diff for dicts and objects.
 
     Converted to lines of strings before returning to pytest. This delaying of rendering allows to
-    join keys when we find differences in nested strcutures.
+    join keys when we find differences in nested structures.
 
     Allows separating diff collection from rendering partially. We want to reuse some of
     the _pytest.assertion.util code, so we work with both this and list[str].
