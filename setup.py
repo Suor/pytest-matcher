@@ -1,7 +1,7 @@
 from setuptools import setup
 
 
-# Remove build status
-README = open('README.rst').read().replace('|Build Status|', '', 1)
-
-setup(long_description=README)
+setup(
+    long_description=open('README.md').read(),
+    long_description_content_type='text/markdown',
+)
