@@ -5,7 +5,7 @@ from functools import partial
 from itertools import count
 
 from _pytest._io.saferepr import safeformat, saferepr
-from _pytest.assertion.util import _compare_eq_sequence, _compare_eq_set, _diff_text, issequence
+from _pytest.assertion.util import issequence, assertrepr_compare
 
 from .matchers import Matcher, MatcherDict
 
@@ -25,7 +25,7 @@ def pytest_assertrepr_compare(config, op: str, left, right):
         right_repr = saferepr(right, maxsize=hspace - len(left_repr))
 
     try:
-        explanation = to_lines(compare(op, left, right, verbose=verbose))
+        explanation = to_lines(compare(config, op, left, right))
         # NOTE: not calling _compare_eq_iterable() anywhere for now
     except Exception:
         crash = _pytest._code.ExceptionInfo.from_current()._getreprcrash()
@@ -42,16 +42,16 @@ def pytest_assertrepr_compare(config, op: str, left, right):
     return [summary] + explanation
 
 
-def compare(op, left, right, verbose=0, path=""):
+def compare(config, op, left, right):
     explanation = []
     for test, explain in EXPLAINERS[op]:
         if test(left, right):
-            return explain(left, right, verbose=verbose)
+            return explain(config, left, right)
     return explanation
 
 
-def compare_eq(left, right, verbose=0):
-    return compare("==", left, right, verbose=verbose) or [f"{left!r} != {right!r}"]
+def compare_eq(config, left, right):
+    return compare(config, "==", left, right) or [f"{left!r} != {right!r}"]
 
 
 # Explainers framework
@@ -79,7 +79,7 @@ def anyis(cls):
 
 
 @register_explainer("==", anyis(MatcherDict))
-def _explain_m_dict(left, right, verbose=0):
+def _explain_m_dict(config, left, right):
     if isinstance(left, MatcherDict) and isinstance(right, MatcherDict):
         return ["Should not compare two M.dict() instances"]
 
@@ -91,19 +91,19 @@ def _explain_m_dict(left, right, verbose=0):
     explanation = _dict_extra(matcher_side, matcher.d, val)
 
     # NOTE: not using sets here to use the matchers keys order
-    diff = _dict_diff([k for k in matcher.d if k in val], left_d, right_d, verbose=verbose)
+    diff = _dict_diff(config, [k for k in matcher.d if k in val], left_d, right_d)
     return explanation + diff
 
 
 @register_explainer("==", bothis(Mapping))
-def _explain_dict(left, right, verbose=0):
+def _explain_dict(config, left, right):
     explanation = []
 
     for side, more, less in [("Left", left, right), ("Right", right, left)]:
         explanation.extend(_dict_extra(side, more, less))
 
     # NOTE: not using sets here to preserve keys order
-    diff = _dict_diff([k for k in right if k in left], left, right, verbose=verbose)
+    diff = _dict_diff(config, [k for k in right if k in left], left, right)
     return explanation + diff
 
 
@@ -117,9 +117,9 @@ def _dict_extra(side, more, less):
     return explanation
 
 
-def _dict_diff(keys, left, right, verbose=0):
+def _dict_diff(config, keys, left, right):
     # NOTE: we use simple key with no ["..."] wrapping to make it cleaner
-    items = {k: compare_eq(left[k], right[k], verbose) for k in keys if left[k] != right[k]}
+    items = {k: compare_eq(config, left[k], right[k]) for k in keys if left[k] != right[k]}
     return Explanation(prefix="Differing items:", items=items) if items else []
 
 
@@ -134,7 +134,7 @@ missing = Missing()
 
 
 @register_explainer("==", anyis(Matcher))
-def _explain_m(left, right, verbose=0):
+def _explain_m(config, left, right):
     if isinstance(left, Matcher) and isinstance(right, Matcher):
         return ["Should not compare two M() instances"]
 
@@ -145,31 +145,30 @@ def _explain_m(left, right, verbose=0):
         matcher, right_d = right, right.attrs
         left_d = {k: getattr(left, k, missing) for k in right_d}
 
-    return _dict_diff(matcher.attrs, left_d, right_d, verbose)
+    return _dict_diff(config, matcher.attrs, left_d, right_d)
 
 
-register_explainer("==", bothis(Set), _compare_eq_set)
+@register_explainer("==", bothis(Set))
+def _explain_set(config, left, right):
+    return assertrepr_compare(config, "==", left, right)
 
 
 @register_explainer("==", bothis(str))
-def _explain_str(left, right, verbose=0):
-    # For obvious situations simply show !=
-    if not left or not right or len(left) + len(right) < 20:
-        return [f"{left!r} != {right!r}"]
-    return _diff_text(left, right, verbose)
+def _explain_str(config, left, right):
+    return assertrepr_compare(config, "==", left, right)
 
 
 # TODO: catch a situation when some item was removed in the middle?
 #       what about swap?
 @register_explainer("==", both(issequence))
-def _explain_seq(left, right, verbose=0):
+def _explain_seq(config, left, right):
     if isinstance(left, bytes) and isinstance(right, bytes):
-        return _compare_eq_sequence(left, right, verbose)
+        return assertrepr_compare(config, "==", left, right)
 
     explanation = []
     for i, l, r in zip(count(), left, right):
         if l != r:  # noqa
-            explanation = Explanation("First mismatch:", {f"[{i}]": compare_eq(l, r, verbose)})
+            explanation = Explanation("First mismatch:", {f"[{i}]": compare_eq(config, l, r)})
             # NOTE: we are ignoring other mismatches, and "First mismatch:" above won't be shown
             #       if the below section will yield nothing
             break
