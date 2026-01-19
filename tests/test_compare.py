@@ -5,10 +5,11 @@ from pytest_matcher.compare import compare, to_lines
 _config = Mock()
 _config.get_terminal_writer.return_value._highlight = lambda source, lexer="python": source
 _config.get_verbosity.return_value = 0
+_config.getoption.return_value = 0  # older pytest versions
 
 
 def comp_eq(left, right):
-    return to_lines(compare(_config, "==", left, right))
+    return [s for s in to_lines(compare(_config, "==", left, right)) if s.strip()]
 
 
 def test_list(M):
@@ -20,8 +21,6 @@ def test_list(M):
         "[1]: 2 != 0",
         "Right contains one more item: 2",
     ]
-
-    # assert compare("==", [1, [2, 3]], [1, [3, 3]]) == ""
     assert comp_eq([1, [2, 3]], [1, [3, 3]]) == ["[1][0]: 2 != 3"]
 
 
@@ -43,7 +42,6 @@ def test_nested_strings(M):
     assert comp_eq(result, expected) == [
         "data.text:",
         "  'This is a lo...some content.' == 'This is a lo...rent content.'",
-        "  ",
         "  - This is a long string with different content.",
         "  ?                            ^^^^ ----",
         "  + This is a long string with some content.",
@@ -57,7 +55,6 @@ def test_nested_sets(M):
     assert comp_eq(result, expected) == [
         "data:",
         "  {1, 2, 3} == {1, 2, 4}",
-        "  ",
         "  Extra items in the left set:",
         "  3",
         "  Extra items in the right set:",
@@ -72,7 +69,24 @@ def test_nested_bytes(M):
     assert comp_eq(result, expected) == [
         "data:",
         "  b'hello' == b'world'",
-        "  ",
         "  At index 0 diff: b'h' != b'w'",
         "  Use -v to get more diff",
     ]
+
+
+# def test_nested_strings_demo(M):
+#     result = {"data": {"text": "This is a long string with some content."}}
+#     expected = {"data": {"text": "This is a long string with different content."}}
+#     assert result == expected
+
+
+# def test_nested_sets_demo(M):
+#     result = {"data": {1, 2, 3}}
+#     expected = {"data": {1, 2, 4}}
+#     assert result == expected
+
+
+# def test_nested_bytes_demo(M):
+#     result = {"data": b"hello"}
+#     expected = {"data": b"world"}
+#     assert result == expected

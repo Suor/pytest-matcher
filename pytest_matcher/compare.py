@@ -14,7 +14,8 @@ def pytest_assertrepr_compare(config, op: str, left, right):
     import shutil
     import _pytest._code
 
-    verbose = config.getoption("verbose")
+    verbose = config.get_verbosity() if hasattr(config, "get_verbosity") \
+        else config.getoption("verbose")
     if verbose > 1:
         left_repr = safeformat(left)
         right_repr = safeformat(right)
