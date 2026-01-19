@@ -115,3 +115,70 @@ tox -e py310
 tox -e pypy3
 tox -e lint
 ```
+
+## Pytest Plugin
+
+`pytest-matcher` comes with a pytest plugin that provides more readable diffs for nested data structures when using `Matcher` objects.
+
+When a test fails, pytest usually prints a diff of the two objects that were compared. However, these diffs can be hard to read. The `pytest-matcher` plugin overrides the default diff representation to pinpoint an exact path and difference.
+
+For example, consider the following failing test:
+
+```python
+from collections import namedtuple
+
+def test_user(M):
+    user = User("Alice", "alice@example.com", True)
+    assert user == M(name="Bob", is_active=False)
+```
+
+Without the plugin, the diff would look something like this:
+
+```
+E   AssertionError: assert User(name='Alice', email='alice@example.com', is_active=True) == M(name='Bob', is_active=False)
+E    +  where M(name='Bob', is_active=False) = <class 'pytest_matcher.matchers.Matcher'>(name='Bob', is_active=False)
+```
+
+With the `pytest-matcher` plugin enabled, the diff is much more informative:
+
+```
+E   AssertionError: assert User(name=...tive=True) == M(name='Bo...ive=False)
+E     name: 'Alice' != 'Bob'
+E     is_active: True != False
+```
+
+This is even more useful when you compare nested data structures. For example, consider the following test:
+
+```python
+def test_nested_structure(M):
+    result = {
+        "users": [alice, bob],
+        "meta": ...
+    }
+    expected = {
+        "users": [
+            M(name="Alice", status="active"),
+            M(name="Bob", email=M.re(r"@example\.com$")),
+        ],
+        "meta": M.any
+    }
+    assert result == expected
+```
+
+Without the plugin, the diff is hard to read (imagine these objects having 10+ fields):
+
+```
+E   AssertionError: assert {'meta': {'er... 'inactive'}]} == {'meta': M.di...ample.com$')]}
+E     
+E     Omitting 1 identical items, use -vv to show
+E     Differing items:
+E     {'users': [{'email': 'alice@example.com', 'name': 'Alice', 'status': 'active'}, {'email': 'bob@invalid', 'name': 'Bob', 'status': 'inactive'}]} != {'users': [M.dict(name='Alice', status='active'), M.dict(name='Bob', email=r'@example.com$')]}
+E     Use -v to get more diff
+```
+
+With the plugin, the diff is much more concise and points to the exact location of the error:
+
+```
+E   AssertionError: assert {'meta': {...active'}} == {'meta': M...e.com$')]}
+E     users[1].email: 'bob@invalid' != r'@example.com$'
+```
