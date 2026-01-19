@@ -1,3 +1,4 @@
+from itertools import takewhile
 from unittest.mock import Mock
 from pytest_matcher.compare import compare, to_lines
 
@@ -9,7 +10,15 @@ _config.getoption.return_value = 0  # older pytest versions
 
 
 def comp_eq(left, right):
-    return [s for s in to_lines(compare(_config, "==", left, right)) if s.strip()]
+    lines = to_lines(compare(_config, "==", left, right))
+    # Filter out pytest's verbose hints that vary between local and CI environments
+    # On CI: pytest shows "Full diff:" when running_on_ci() is True
+    # Locally: pytest shows "Use -v to get more diff" when verbose is low
+    return list(takewhile(
+        lambda line: line.strip() not in ("Use -v to get more diff", "Full diff:"),
+        # Also skip whitespace-only strings, these are pytest version dependent
+        (line for line in lines if not line.isspace())
+    ))
 
 
 def test_list(M):
@@ -59,7 +68,6 @@ def test_nested_sets(M):
         "  3",
         "  Extra items in the right set:",
         "  4",
-        "  Use -v to get more diff",
     ]
 
 
@@ -70,7 +78,6 @@ def test_nested_bytes(M):
         "data:",
         "  b'hello' == b'world'",
         "  At index 0 diff: b'h' != b'w'",
-        "  Use -v to get more diff",
     ]
 
 
