@@ -24,9 +24,10 @@ from assert_matcher import M
 ## Installation
 
 ```bash
-pip install git+https://github.com/Suor/assert-matcher.git@master
-# pip install assert-matcher  # not released yet
+pip install assert-matcher
+pip install git+https://github.com/Suor/assert-matcher.git@master  # the newest one
 ```
+
 
 ## Matchers
 
@@ -120,12 +121,12 @@ pytest
 ```
 
 To fully run `tox` you need all the supported pythons to be installed. These are
-3.7+ and PyPy3. You can run it for particular environment even in absense
+3.9+ and PyPy3. You can run it for particular environment even in absense
 of all of the above:
 
 ```
-tox -e py310
-tox -e pypy3
+tox -e py314
+tox -e pypy311
 tox -e lint
 ```
 
