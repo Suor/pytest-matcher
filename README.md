@@ -14,6 +14,13 @@ def test_smth(M):  # A special Matcher fixture
 Here all the structures like lists and dicts are followed as usual both outside and inside
 a matcher object, while the matcher object and other helpers provide their own equality. These could be freely intermixed.
 
+Alternatively may import Matcher directly this is more verbose but also more universal, i.e. works outside of pytest:
+
+```python
+from assert_matcher import Matcher as M
+```
+
+
 ## Installation
 
 ```bash
@@ -167,7 +174,7 @@ Without the plugin, the diff is hard to read (imagine these objects having 10+ f
 
 ```
 E   AssertionError: assert {'meta': {'er... 'inactive'}]} == {'meta': M.di...ample.com$')]}
-E     
+E
 E     Omitting 1 identical items, use -vv to show
 E     Differing items:
 E     {'users': [{'email': 'alice@example.com', 'name': 'Alice', 'status': 'active'}, {'email': 'bob@invalid', 'name': 'Bob', 'status': 'inactive'}]} != {'users': [M.dict(name='Alice', status='active'), M.dict(name='Bob', email=r'@example.com$')]}
