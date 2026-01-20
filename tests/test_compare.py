@@ -1,6 +1,6 @@
 from itertools import takewhile
 from unittest.mock import Mock
-from pytest_matcher.compare import compare, to_lines
+from assert_matcher.compare import compare, to_lines
 
 
 _config = Mock()

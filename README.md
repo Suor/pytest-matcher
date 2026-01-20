@@ -1,4 +1,4 @@
-# Pytest Matcher [![Build Status](https://github.com/Suor/pytest-matcher/actions/workflows/ci.yml/badge.svg)](https://github.com/Suor/pytest-matcher/actions/workflows/test.yml?query=branch%3Amaster)
+# Assert Matcher [![Build Status](https://github.com/Suor/assert-matcher/actions/workflows/ci.yml/badge.svg)](https://github.com/Suor/assert-matcher/actions/workflows/test.yml?query=branch%3Amaster)
 
 The purpose of this library is to simplify asserts containing objects and nested data structures, i.e.:
 
@@ -17,8 +17,8 @@ a matcher object, while the matcher object and other helpers provide their own e
 ## Installation
 
 ```bash
-pip install git+https://github.com/Suor/pytest-matcher.git@master
-# pip install pytest-matcher  # not released yet
+pip install git+https://github.com/Suor/assert-matcher.git@master
+# pip install assert-matcher  # not released yet
 ```
 
 ## Matchers
@@ -118,15 +118,13 @@ tox -e lint
 
 ## Pytest Plugin
 
-`pytest-matcher` comes with a pytest plugin that provides more readable diffs for nested data structures when using `Matcher` objects.
+`assert-matcher` provides enhanced assertion representation for pytest, making diffs for nested data structures more readable when using `Matcher` objects.
 
-When a test fails, pytest usually prints a diff of the two objects that were compared. However, these diffs can be hard to read. The `pytest-matcher` plugin overrides the default diff representation to pinpoint an exact path and difference.
+When a test fails, pytest usually prints a diff of the two objects that were compared. However, these diffs can be hard to read. `assert-matcher` plugin overrides the default diff representation to pinpoint an exact path and difference.
 
 For example, consider the following failing test:
 
 ```python
-from collections import namedtuple
-
 def test_user(M):
     user = User("Alice", "alice@example.com", True)
     assert user == M(name="Bob", is_active=False)
@@ -136,10 +134,10 @@ Without the plugin, the diff would look something like this:
 
 ```
 E   AssertionError: assert User(name='Alice', email='alice@example.com', is_active=True) == M(name='Bob', is_active=False)
-E    +  where M(name='Bob', is_active=False) = <class 'pytest_matcher.matchers.Matcher'>(name='Bob', is_active=False)
+E    +  where M(name='Bob', is_active=False) = <class 'assert_matcher.matchers.Matcher'>(name='Bob', is_active=False)
 ```
 
-With the `pytest-matcher` plugin enabled, the diff is much more informative:
+With the `assert-matcher` plugin enabled, the diff is much more readable:
 
 ```
 E   AssertionError: assert User(name=...tive=True) == M(name='Bo...ive=False)

@@ -31,7 +31,7 @@ def pytest_assertrepr_compare(config, op: str, left, right):
     except Exception:
         crash = _pytest._code.ExceptionInfo.from_current()._getreprcrash()
         explanation = [
-            "pytest_matcher_compare failed:",
+            "assert_matcher comparison failed:",
             f"  {crash}",
             "Probably an object has a faulty __repr__.",
         ]

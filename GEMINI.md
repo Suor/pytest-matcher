@@ -1,10 +1,10 @@
 # Project Overview
 
-This project is a Python library called `pytest-matcher`. Its purpose is to simplify asserts containing objects and nested data structures in tests.
+This project is a Python library called `assert-matcher`. Its purpose is to simplify asserts containing objects and nested data structures in tests.
 
 It will work with any test framework by overloaing equality, it also provides pytest plugin to show nice diffs with its matcher objects.
 
-The project is structured as a standard Python package with a `setup.py` file and a `pytest_matcher` module.
+The project is structured as a standard Python package with a `setup.py` file and a `assert_matcher` module.
 
 # Building and Running
 

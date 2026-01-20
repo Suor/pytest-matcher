@@ -18,7 +18,7 @@ jobs:
     - name: Lint
       run: |
         pip install flake8
-        flake8 pytest_matcher
+        flake8 assert_matcher
         flake8 tests
 
   test:

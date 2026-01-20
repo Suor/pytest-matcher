@@ -2,8 +2,8 @@
 
 set -ex
 
-NAME=pytest-matcher
-VERSION=`awk '/VERSION = /{gsub(/'\''/, "", $3); print $3}' pytest_matcher/__init__.py`
+NAME=assert-matcher
+VERSION=`awk '/VERSION = /{gsub(/'\''/, "", $3); print $3}' assert_matcher/__init__.py`
 
 echo "Publishing $NAME-$VERSION..."
 python setup.py sdist bdist_wheel
