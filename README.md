@@ -17,7 +17,7 @@ a matcher object, while the matcher object and other helpers provide their own e
 Alternatively may import Matcher directly this is more verbose but also more universal, i.e. works outside of pytest:
 
 ```python
-from assert_matcher import Matcher as M
+from assert_matcher import M
 ```
 
 
