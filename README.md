@@ -45,6 +45,9 @@ assert users == [
     M(name="Alice", is_active=True),
     M(name="Bob", is_active=False),
 ]
+
+# May test class if that is important
+assert user == M(__class__=User, name="Alice")
 ```
 
 #### `M.re(pattern, flags=0)`
@@ -61,6 +64,7 @@ Matches a dictionary against a subset of keys. It checks that the keys exist and
 
 ```python
 assert {"a": 1, "b": 2} == M.dict(a=1)
+assert {"a": 1, "b": 2} == M.dict({"a": 1})  # same
 ```
 
 #### M.any
@@ -102,7 +106,9 @@ Performs approximate comparison of numbers. It's a wrapper around `pytest.approx
 
 ```python
 assert 0.1 + 0.2 == M.approx(0.3)
+assert end_time == M.approx(start_time + timedelta(seconds=1), abs=0.1)
 ```
+
 
 ## Running tests
 
